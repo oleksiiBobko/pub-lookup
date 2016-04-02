@@ -1,0 +1,9 @@
+/target
+/.settings
+.classpath
+.project
+.springBeans
+src/main/resources/log4j.xml
+src/main/resources/jdbc.properties
+src/main/resources/email.properties
+
