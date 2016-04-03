@@ -24,7 +24,10 @@ Lookup nearest Pub either by address or postal code
 <c:if test="${!empty pubs}">
 <c:forEach items="${pubs}" var="pub">
 <p>${pub.pubName}</p>
-<p>${pub.area}</p><br>
+<p>${pub.locality}</p><br>
+<p>mailes: ${pub.distanceMiles}</p><br>
+<p>km: ${pub.distanceKilometers}</p><br>
+<hr>
 </c:forEach>
 </c:if>
 </div>

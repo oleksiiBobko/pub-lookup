@@ -9,6 +9,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -21,21 +23,32 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.tidy.Tidy;
 
+import com.pub.lookup.domain.PostCode;
 import com.pub.lookup.domain.PubEntity;
+import com.pub.lookup.service.PostCodePersistenceService;
+import com.pub.lookup.service.PostalCodeLookupService;
 import com.pub.lookup.service.PubProviderService;
 
 @Service
+@Transactional
 public class PubProviderServiceImpl implements PubProviderService {
 
     private static final Logger LOGGER = Logger.getLogger(PubProviderServiceImpl.class);
+    
+    private static final String DISTANCE_PATTERN = "([0-9]*\\.[0-9]*).*\\(([0-9]*\\.[0-9]*)";
+    
+    private static Pattern distancePattern = Pattern.compile(DISTANCE_PATTERN);
     
     @Value("${pub.source.url}")
     private String url;
@@ -48,6 +61,12 @@ public class PubProviderServiceImpl implements PubProviderService {
     
     @Value("${browser.user.agent}")
     private String userAgent;
+    
+    @Autowired
+    private PostalCodeLookupService postalCodeLookupService;
+    
+    @Autowired
+    private PostCodePersistenceService postCodePersistenceService;
     
     @Override
     public List<PubEntity> getPubInfo(String search) throws Exception {
@@ -118,23 +137,46 @@ public class PubProviderServiceImpl implements PubProviderService {
         try {
             expr = xpath.compile("//div[@class=\"pub_details\"]");
             NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-            if(nl != null && nl.getLength() > 0){
+            if(nl != null) {
                 for (int i = 0; i < nl.getLength(); i++) {
                     String pubName = null;
-                    String area = null;
+                    String distance = null;
+                    String locality = null;
                     Element el = (org.w3c.dom.Element) nl.item(i);
                     Node pubNode = el.getElementsByTagName("a").item(0);
                     if(pubNode != null) {
                         pubName = pubNode.getFirstChild().getNodeValue();
                     }
+                    NodeList details = el.getElementsByTagName("p");
+                    if (details != null) {
+                        for(int j = 0; j < details.getLength(); j++) {
+                            Node detailsNode = details.item(j);
+                            if(detailsNode != null) {
+                                NamedNodeMap attrs = detailsNode.getAttributes();
+                                Node namedItem = attrs.getNamedItem("class");
+                                if(namedItem != null) {
+                                    if (namedItem.getNodeValue().equals("distance")) {
+                                        distance = detailsNode.getFirstChild().getNodeValue();
+                                    } else if (namedItem.getNodeValue().equals("pub_address")) {
+                                        locality = detailsNode.getFirstChild().getNodeValue();
+                                    }
+                                }
+                                
+                            }
+                        }
+                    }
                     
-                    Node areaNode = el.getElementsByTagName("p").item(0);
-                    if(areaNode != null) {
-                        area = areaNode.getFirstChild().getNodeValue();
+                    Matcher m = distancePattern.matcher(distance);
+                    
+                    if(m.find() && pubName != null && !pubName.isEmpty() && locality != null && !locality.isEmpty()) {
+                        PubEntity newPub = new PubEntity(pubName, locality);
+//                        newPub.setDistanceMiles(Double.valueOf(m.group(1)));
+//                        newPub.setDistanceKilometers(Double.valueOf(m.group(2)));
+                        result.add(newPub);
                     }
-                    if(pubName != null && !pubName.isEmpty() && area != null && !area.isEmpty()) {
-                        result.add(new PubEntity(pubName, area));
-                    }
+                    PostCode postCode = new PostCode();
+                    postCode.setPostCode("XXX XXX");
+                    postCodePersistenceService.saveOrUpdate(postCode);
                 }
            }
         } catch (XPathExpressionException e) {

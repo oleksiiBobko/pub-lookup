@@ -1,18 +1,31 @@
 package com.pub.lookup.domain;
 
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+@Entity
 public class PubEntity {
 
+    @Id
+    private String pubId;
+    
+    @Column
     private String pubName;
     
-    private String area;
+    @Column
+    private String locality;
     
-    public PubEntity() {
-        super();
-    }
+    @OneToMany(targetEntity = Distance.class, mappedBy = "distanceId", fetch = FetchType.LAZY)
+    private List<Distance> distances;
     
-    public PubEntity(String pubName, String area) {
+    public PubEntity(String pubName, String locality) {
         this.pubName = pubName;
-        this.area = area;
+        this.locality = locality;
     }
 
     public String getPubName() {
@@ -23,12 +36,12 @@ public class PubEntity {
         this.pubName = pubName;
     }
 
-    public String getArea() {
-        return area;
+    public String getLocality() {
+        return locality;
     }
 
-    public void setArea(String area) {
-        this.area = area;
+    public void setLocality(String locality) {
+        this.locality = locality;
     }
 
 }
