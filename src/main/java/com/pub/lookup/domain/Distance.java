@@ -2,30 +2,35 @@ package com.pub.lookup.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="distance")
 public class Distance {
 
     @Id
+    @GeneratedValue
+    @Column(name = "distanceId")
     private int distanceId;
-    
+
     @ManyToOne
     @JoinColumn(name = "pubId")
-    private PubEntity pub;
-    
+    private PubEntity pubId;
+
     @ManyToOne
     @JoinColumn(name = "postCode")
     private PostCode postCode;
-    
-    @Column
+
+    @Column(name="distance")
     private String distance;
-    
+
     @Column
     private double distanceMiles;
-    
+
     @Column
     private double distanceKilometers;
 
@@ -62,11 +67,11 @@ public class Distance {
     }
 
     public PubEntity getPub() {
-        return pub;
+        return pubId;
     }
 
     public void setPub(PubEntity pub) {
-        this.pub = pub;
+        this.pubId = pub;
     }
 
     public PostCode getPostCode() {
@@ -76,5 +81,5 @@ public class Distance {
     public void setPostCode(PostCode postCode) {
         this.postCode = postCode;
     }
-    
+
 }

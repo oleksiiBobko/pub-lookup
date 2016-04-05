@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -37,11 +36,10 @@ import org.w3c.tidy.Tidy;
 import com.pub.lookup.domain.PostCode;
 import com.pub.lookup.domain.PubEntity;
 import com.pub.lookup.service.PostCodePersistenceService;
-import com.pub.lookup.service.PostalCodeLookupService;
+import com.pub.lookup.service.PostCodeLookupService;
 import com.pub.lookup.service.PubProviderService;
 
 @Service
-@Transactional
 public class PubProviderServiceImpl implements PubProviderService {
 
     private static final Logger LOGGER = Logger.getLogger(PubProviderServiceImpl.class);
@@ -63,13 +61,13 @@ public class PubProviderServiceImpl implements PubProviderService {
     private String userAgent;
     
     @Autowired
-    private PostalCodeLookupService postalCodeLookupService;
+    private PostCodeLookupService postalCodeLookupService;
     
     @Autowired
     private PostCodePersistenceService postCodePersistenceService;
     
     @Override
-    public List<PubEntity> getPubInfo(String search) throws Exception {
+    public List<Object> getPubInfo(String search) throws Exception {
         String formatedParams = String.format(params, URLEncoder.encode(search, "UTF-8"));
         String request = url + "/" + uri + "?" + formatedParams;
         String rawResult = doGetRequest(request);
@@ -119,9 +117,9 @@ public class PubProviderServiceImpl implements PubProviderService {
     }
     
     
-    private List<PubEntity> cleanData(String data) throws UnsupportedEncodingException {
+    private List<Object> cleanData(String data) throws UnsupportedEncodingException {
         
-        List<PubEntity> result = new ArrayList<>();
+        List<Object> result = new ArrayList<>();
         
         Tidy tidy = new Tidy();
         tidy.setInputEncoding("UTF-8");
@@ -170,8 +168,8 @@ public class PubProviderServiceImpl implements PubProviderService {
                     
                     if(m.find() && pubName != null && !pubName.isEmpty() && locality != null && !locality.isEmpty()) {
                         PubEntity newPub = new PubEntity(pubName, locality);
-//                        newPub.setDistanceMiles(Double.valueOf(m.group(1)));
-//                        newPub.setDistanceKilometers(Double.valueOf(m.group(2)));
+                        newPub.setDistanceMiles(Double.valueOf(m.group(1)));
+                        newPub.setDistanceKilometers(Double.valueOf(m.group(2)));
                         result.add(newPub);
                     }
                     PostCode postCode = new PostCode();
