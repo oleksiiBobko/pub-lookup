@@ -7,29 +7,72 @@
 <html>
 <head>
 <title>PubLookup</title>
+<link href="resources/css/bootstrap.css" rel="stylesheet" type="text/css" />
+<link href="resources/css/default.css" rel="stylesheet" type="text/css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="resources/js/bootstrap.min.js"></script>
+<meta http-equiv="Content-Type" content="text/html;">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1">
 </head>
 <body>
-<h1>
-Lookup nearest Pub either by address or postal code
-</h1>
-<div class="panel-body">
-<form method="post" action="/">
-    <div class="form-group">
-        <input type="text" class="form-control input-sm" name="address" placeholder="address" />
+    <div class="container">
+
+        <div class="page-header">
+            <h1>Lookup nearest Pub either by address or post code</h1>
+        </div>
+
+        <div class="panel-body">
+            <form method="post" action="/">
+                <div class="form-group">
+                    <input type="text" class="form-control input-sm"
+                        name="search" placeholder="search" />
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="lookup"
+                        class="btn btn-info btn-block" />
+                </div>
+            </form>
+            <div class="row">
+                <div class="col-sm-12">
+                    <button type="button" class="btn btn-success">IG11 0SN</button>
+                    <button type="button" class="btn btn-success">IG11 0SN</button>
+                    <button type="button" class="btn btn-success">IG11 0SN</button>
+                    <button type="button" class="btn btn-success">IG11 0SN</button>
+                    <button type="button" class="btn btn-success">IG11 0SN</button>
+                    <button type="button" class="btn btn-success">IG11 0SN</button>
+                    <button type="button" class="btn btn-success">IG11 0SN</button>
+                    <button type="button" class="btn btn-success">IG11 0SN</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-8">
+                    <c:if test="${!empty distances}">
+                        <h2>Pub list</h2>
+                        <ul class="list-group">
+                        <c:forEach items="${distances}" var="distance">
+                        <li class="list-group-item">
+                            <a href="#">
+                                <p>${distance.pub.pubName}</p>
+                                <p>${distance.pub.locality}</p>
+                                <p>${distance.distance}</p>
+                            </a>
+                            </li>
+                        </c:forEach>
+                        </ul>
+                    </c:if>
+                </div>
+                <div class="col-sm-4">
+                    <h2>Most recent searches</h2>
+                    <ul class="list-group">
+                        <li class="list-group-item">First item</li>
+                        <li class="list-group-item">Second item</li>
+                        <li class="list-group-item">Third item</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <input type="submit" value="lookup" class="btn btn-info btn-block" />
-    </div>
-</form>
-<c:if test="${!empty pubs}">
-<c:forEach items="${pubs}" var="pub">
-<p>${pub.pubName}</p>
-<p>${pub.locality}</p><br>
-<p>mailes: ${pub.distanceMiles}</p><br>
-<p>km: ${pub.distanceKilometers}</p><br>
-<hr>
-</c:forEach>
-</c:if>
-</div>
 </body>
 </html>

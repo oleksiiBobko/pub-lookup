@@ -14,15 +14,15 @@ public class Distance {
 
     @Id
     @GeneratedValue
-    @Column(name = "distanceId")
-    private int distanceId;
+    @Column(name = "id")
+    private int id;
 
     @ManyToOne
-    @JoinColumn(name = "pubId")
-    private PubEntity pubId;
+    @JoinColumn(name = "pub_id")
+    private PubEntity pub;
 
     @ManyToOne
-    @JoinColumn(name = "postCode")
+    @JoinColumn(name = "pc_id")
     private PostCode postCode;
 
     @Column(name="distance")
@@ -58,20 +58,12 @@ public class Distance {
         this.distanceKilometers = distanceKilometers;
     }
 
-    public int getDistanceId() {
-        return distanceId;
-    }
-
-    public void setDistanceId(int distanceId) {
-        this.distanceId = distanceId;
-    }
-
     public PubEntity getPub() {
-        return pubId;
+        return pub;
     }
 
     public void setPub(PubEntity pub) {
-        this.pubId = pub;
+        this.pub = pub;
     }
 
     public PostCode getPostCode() {
@@ -80,6 +72,10 @@ public class Distance {
 
     public void setPostCode(PostCode postCode) {
         this.postCode = postCode;
+    }
+
+    public int getId() {
+        return id;
     }
 
 }

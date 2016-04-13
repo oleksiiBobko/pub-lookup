@@ -1,7 +1,9 @@
 package com.pub.lookup.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -19,14 +21,16 @@ public class PostCode {
     @Id
     @NotNull
     @NotEmpty
-    @Column(name = "postCode")
+    @Column(name = "pc_id")
     private String postCode;
     
-    @OneToMany(targetEntity = Distance.class, mappedBy = "distanceId", fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = Distance.class, mappedBy = "postCode", 
+            fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Distance> distances;
 
     public PostCode() {
         super();
+        this.distances = new ArrayList<Distance>();
     }
 
     public PostCode(String postCode, List<Distance> distances) {

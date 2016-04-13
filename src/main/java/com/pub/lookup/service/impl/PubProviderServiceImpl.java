@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -33,13 +34,18 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.tidy.Tidy;
 
+import com.pub.lookup.dao.interfaces.DistanceDao;
+import com.pub.lookup.dao.interfaces.PostCodeDao;
+import com.pub.lookup.dao.interfaces.PubDao;
+import com.pub.lookup.domain.Distance;
 import com.pub.lookup.domain.PostCode;
 import com.pub.lookup.domain.PubEntity;
-import com.pub.lookup.service.PostCodePersistenceService;
+import com.pub.lookup.service.PersistenceService;
 import com.pub.lookup.service.PostCodeLookupService;
 import com.pub.lookup.service.PubProviderService;
 
 @Service
+@Transactional
 public class PubProviderServiceImpl implements PubProviderService {
 
     private static final Logger LOGGER = Logger.getLogger(PubProviderServiceImpl.class);
@@ -64,14 +70,26 @@ public class PubProviderServiceImpl implements PubProviderService {
     private PostCodeLookupService postalCodeLookupService;
     
     @Autowired
-    private PostCodePersistenceService postCodePersistenceService;
+    private PostCodeDao postCodeDao;
+    
+    @Autowired
+    private PubDao pubDao;
+    
+    @Autowired
+    private DistanceDao distanceDao;
     
     @Override
-    public List<Object> getPubInfo(String search) throws Exception {
+    public PostCode getPubInfo(String search) throws Exception {
+        
+        PostCode result = postCodeDao.find(search);
+        if(result != null) {
+            return result;
+        }
+        
         String formatedParams = String.format(params, URLEncoder.encode(search, "UTF-8"));
         String request = url + "/" + uri + "?" + formatedParams;
         String rawResult = doGetRequest(request);
-        return cleanData(rawResult);
+        return cleanData(rawResult, search);
     }
 
     private String doGetRequest(String url) {
@@ -117,10 +135,11 @@ public class PubProviderServiceImpl implements PubProviderService {
     }
     
     
-    private List<Object> cleanData(String data) throws UnsupportedEncodingException {
+    private PostCode cleanData(String data, String search) throws UnsupportedEncodingException {
         
-        List<Object> result = new ArrayList<>();
-        
+        PostCode postCode = new PostCode();
+        postCode.setPostCode(search);
+        postCodeDao.add(postCode);
         Tidy tidy = new Tidy();
         tidy.setInputEncoding("UTF-8");
         tidy.setOutputEncoding("UTF-8");
@@ -166,21 +185,30 @@ public class PubProviderServiceImpl implements PubProviderService {
                     
                     Matcher m = distancePattern.matcher(distance);
                     
+                    PubEntity pub = null;
+                    
                     if(m.find() && pubName != null && !pubName.isEmpty() && locality != null && !locality.isEmpty()) {
-                        PubEntity newPub = new PubEntity(pubName, locality);
-                        newPub.setDistanceMiles(Double.valueOf(m.group(1)));
-                        newPub.setDistanceKilometers(Double.valueOf(m.group(2)));
-                        result.add(newPub);
+                        pub = pubDao.find(pubName + locality);
+                        if(pub == null) {
+                            pub = new PubEntity(pubName, locality);
+                            pubDao.add(pub);
+                        }
+                        Distance d = new Distance();
+                        d.setDistance(distance);
+                        d.setDistanceMiles(Double.valueOf(m.group(1)));
+                        d.setDistanceKilometers(Double.valueOf(m.group(2)));
+                        pub.getDistances().add(d);
+                        d.setPub(pub);
+                        d.setPostCode(postCode);
+                        postCode.getDistances().add(d);
+                        distanceDao.add(d);
                     }
-                    PostCode postCode = new PostCode();
-                    postCode.setPostCode("XXX XXX");
-                    postCodePersistenceService.saveOrUpdate(postCode);
                 }
            }
         } catch (XPathExpressionException e) {
             LOGGER.error("xPath error", e);
         }
-        return result;
+        return postCode;
     }
     
 }
