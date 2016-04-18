@@ -22,8 +22,8 @@ public class Distance {
     private PubEntity pub;
 
     @ManyToOne
-    @JoinColumn(name = "pc_id")
-    private PostCode postCode;
+    @JoinColumn(name = "point_id")
+    private Point point;
 
     @Column(name="distance")
     private String distance;
@@ -66,16 +66,16 @@ public class Distance {
         this.pub = pub;
     }
 
-    public PostCode getPostCode() {
-        return postCode;
-    }
-
-    public void setPostCode(PostCode postCode) {
-        this.postCode = postCode;
-    }
-
     public int getId() {
         return id;
+    }
+
+    public Point getPoint() {
+        return point;
+    }
+
+    public void setPoint(Point point) {
+        this.point = point;
     }
 
 }

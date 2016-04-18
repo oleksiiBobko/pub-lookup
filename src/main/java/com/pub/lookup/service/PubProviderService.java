@@ -1,10 +1,11 @@
 package com.pub.lookup.service;
 
-import com.pub.lookup.domain.PostCode;
+import com.pub.lookup.domain.GeoSearch;
+import com.pub.lookup.domain.Point;
 
 
 public interface PubProviderService {
     
-    public PostCode getPubInfo(String search) throws Exception;
+    public Point getPubInfo(String geoResult) throws Exception;
     
 }

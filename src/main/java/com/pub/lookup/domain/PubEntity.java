@@ -22,11 +22,20 @@ public class PubEntity {
     @Column(name = "pub_name")
     private String pubName;
     
-    @Column(name = "locality")
-    private String locality;
+    @Column(name = "address")
+    private String address;
     
     @Column(name = "post_code")
     private String postCode;
+    
+    @Column(name = "country")
+    private String country;
+    
+    @Column(name = "city")
+    private String city;
+    
+    @Column(name = "district")
+    private String district;
     
     @OneToMany(targetEntity = Distance.class, mappedBy = "pub", 
             fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -36,10 +45,10 @@ public class PubEntity {
         super();
     }
 
-    public PubEntity(String pubName, String locality) {
-        this.pubId = pubName + locality;
+    public PubEntity(String pubName, String city) {
+        this.pubId = pubName + city;
         this.pubName = pubName;
-        this.locality = locality;
+        this.city = city;
         setDistances(new ArrayList<Distance>());
     }
 
@@ -49,14 +58,6 @@ public class PubEntity {
 
     public void setPubName(String pubName) {
         this.pubName = pubName;
-    }
-
-    public String getLocality() {
-        return locality;
-    }
-
-    public void setLocality(String locality) {
-        this.locality = locality;
     }
 
     public String getPubId() {
@@ -81,6 +82,38 @@ public class PubEntity {
 
     public void setPostCode(String postCode) {
         this.postCode = postCode;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
 }
