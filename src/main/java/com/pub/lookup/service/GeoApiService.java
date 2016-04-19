@@ -6,4 +6,6 @@ public interface GeoApiService {
     public GeoSearch validateSearch(String search) throws Exception;
     
     public String getSearchStringByPriority(String search);
+    
+    public String getSearchView(String search);
 }

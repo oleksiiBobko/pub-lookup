@@ -108,11 +108,11 @@ $(".submit_form").submit(function(event) {
             <div class="row">
                 <div class="col-sm-8">
                     <c:if test="${!empty distances}">
-                        <h2>search by <b>${search}</b></h2>
+                        <h2>search by <b>${search_view}</b></h2>
                         <ul class="list-group">
                         <c:forEach items="${distances}" var="distance">
                         <li class="list-group-item">
-                            <a href="${ctxt}/pub?search=${distance.pub.postCode}">
+                            <a href="${ctxt}/pub?search=${distance.pub.postCode}&search_view=${distance.pub.postCode}">
                                 <p><b>Name:&nbsp</b><i>${distance.pub.pubName}</i></p>
                                 <p><b>Address:&nbsp</b><i>${distance.pub.address}</i></p>
                                 <p><b>Post code:&nbsp</b><i>${distance.pub.postCode}</i></p>

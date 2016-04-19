@@ -1,6 +1,5 @@
 package com.pub.lookup.web;
 
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.pub.lookup.domain.GeoResult;
 import com.pub.lookup.domain.GeoSearch;
 import com.pub.lookup.domain.Point;
 import com.pub.lookup.service.GeoApiService;
@@ -42,7 +40,8 @@ public class HomeController {
     }
     
     @RequestMapping(value = "/pub", method = RequestMethod.GET)
-    public String getResults(Model model, @RequestParam("search") String search) {
+    public String getResults(Model model, @RequestParam("search") String search,
+            @RequestParam("search_view") String searchView) {
         
         Point point = null;
         
@@ -54,13 +53,16 @@ public class HomeController {
         }
         model.addAttribute("distances", point.getDistances());
         model.addAttribute("search", search);
+        model.addAttribute("search_view", searchView);
         return "home";
     }
     
     @RequestMapping(value = "/specify", method = RequestMethod.GET)
     public String specifyResults(Model model, @RequestParam("search") String search) {
-        search = geoApiService.getSearchStringByPriority(search);
-        model.addAttribute("search", search);
+        String validSearch = geoApiService.getSearchStringByPriority(search);
+        String searchView = geoApiService.getSearchView(search);
+        model.addAttribute("search", validSearch);
+        model.addAttribute("search_view", searchView);
         return "redirect:/pub";
     }
     

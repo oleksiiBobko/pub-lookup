@@ -104,22 +104,47 @@ public class GeoApiServiceImpl implements GeoApiService {
     public String getSearchStringByPriority(String search) {
         GeoResult geoResult = geoResultDao.find(Integer.valueOf(search));
         
-        if(geoResult.getPostalCode() != null && !geoResult.getPostalCode().isEmpty()) {
+        if (geoResult.getPostalCode() != null
+                && !geoResult.getPostalCode().isEmpty()
+                && geoResult.getPostalCode().contains(" ")) {
             return geoResult.getPostalCode();
-        } else if(geoResult.getPostalTown() != null && !geoResult.getPostalTown().isEmpty()) {
+            
+        } else if (geoResult.getLocality() != null
+                && !geoResult.getLocality().isEmpty()) {
+            return geoResult.getLocality();
+            
+        } else if (geoResult.getPostalTown() != null
+                && !geoResult.getPostalTown().isEmpty()) {
             return geoResult.getPostalTown();
-        } else if(geoResult.getAdministrativeAreaLevel5() != null && !geoResult.getAdministrativeAreaLevel5().isEmpty()) {
+            
+        } else if (geoResult.getAdministrativeAreaLevel5() != null
+                && !geoResult.getAdministrativeAreaLevel5().isEmpty()) {
             return geoResult.getAdministrativeAreaLevel1();
-        } else if(geoResult.getAdministrativeAreaLevel4() != null && !geoResult.getAdministrativeAreaLevel4().isEmpty()) {
+            
+        } else if (geoResult.getAdministrativeAreaLevel4() != null
+                && !geoResult.getAdministrativeAreaLevel4().isEmpty()) {
             return geoResult.getAdministrativeAreaLevel4();
-        } else if(geoResult.getAdministrativeAreaLevel3() != null && !geoResult.getAdministrativeAreaLevel3().isEmpty()) {
+            
+        } else if (geoResult.getAdministrativeAreaLevel3() != null
+                && !geoResult.getAdministrativeAreaLevel3().isEmpty()) {
             return geoResult.getAdministrativeAreaLevel3();
-        } else if(geoResult.getAdministrativeAreaLevel2() != null && !geoResult.getAdministrativeAreaLevel2().isEmpty()) {
+            
+        } else if (geoResult.getAdministrativeAreaLevel2() != null
+                && !geoResult.getAdministrativeAreaLevel2().isEmpty()) {
             return geoResult.getAdministrativeAreaLevel2();
-        } else if(geoResult.getAdministrativeAreaLevel1() != null && !geoResult.getAdministrativeAreaLevel1().isEmpty()) {
+            
+        } else if (geoResult.getAdministrativeAreaLevel1() != null
+                && !geoResult.getAdministrativeAreaLevel1().isEmpty()) {
             return geoResult.getAdministrativeAreaLevel1();
+            
         }
         return search;
+    }
+
+    @Override
+    public String getSearchView(String search) {
+        GeoResult geoResult = geoResultDao.find(Integer.valueOf(search));
+        return geoResult == null ? "" : geoResult.getFormatted();
     }
 
 }
