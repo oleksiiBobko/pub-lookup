@@ -75,10 +75,19 @@
                 <prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
                 <prop key="hibernate.use_sql_comments">${hibernate.use_sql_comments}</prop>
                 <prop key="hibernate.auto_close_session">${hibernate.auto_close_session}</prop>
+                <prop key="hibernate.connection.isolation">8</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
             </props>
         </property>
 
+    </bean>
+
+    <bean id="cachedSearch" class="com.pub.lookup.components.CachedSearchComponent" scope="session">
+        <aop:scoped-proxy/>
+    </bean>
+    
+    <bean id="cachedRequest" class="com.pub.lookup.components.CachedSearchComponent" scope="session">
+        <aop:scoped-proxy/>
     </bean>
 
 </beans>

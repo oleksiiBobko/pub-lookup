@@ -13,7 +13,7 @@
 <ul class="list-group">
 <c:forEach items="${result}" var="item">
 <li class="list-group-item">
-<a href="${ctxt}/specify?search=${item.id}">${item.formatted}</a>
+<a class="link" href="${ctxt}/specify?search=${item.id}">${item.formatted}</a>
 </li>
 </c:forEach>
 </ul>

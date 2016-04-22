@@ -19,62 +19,85 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <script>
+$(window).load(function() {
+    $('#loading').hide();
+});
 $(document).ready(function() {
-$('#submit-btn').click(function() {
-    $('#submit-form').submit();
+$('.result').on('click', 'a', function() {
+    $('.selectModal').hide();
+    $('#loading').show();
+});
+$('a').click(function(){
+    $('#loading').show();
+});
+$('.submit_btn').click(function() {
+    if($('input[type=text]').val() == '') {
+        return false;
+    }
+    $('input[type=submit]').attr('disabled', true);
+    $('.submit_form').submit();
 });
 
 $(".submit_form").submit(function(event) {
     var postData = $(this).serializeArray();
     var formURL = $(this).attr('action');
     var method = $(this).attr('method');
-  $.ajax({
-      type: method,
-      url: formURL,
-      data: postData,
-      success: function(data, textStatus, jqXHR) {
-          console.log('success');
-          if(jqXHR.status === 200) {
-              console.log(data)
+    $.ajax({
+    type: method,
+    url: formURL,
+    data: postData,
+    success: function(data, textStatus, jqXHR) {
+         if(jqXHR.status === 200) {
               $('.result').html(data);
               $(".selectModal").modal('show');
-          }
-        },
-      error: function(jqXHR, textStatus, errorThrown) {
-          console.log(jqXHR);
-          $('.result').html('<div class="alert alert-danger" role="alert">' + jqXHR.responseText + '</div>');
-          window.setTimeout(function () {
+              $('input[type=submit]').attr('disabled', false);
+         }
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+         $('.result').html('<div class="alert alert-danger" role="alert">' + jqXHR.responseText + '</div>');
+         window.setTimeout(function () {
               $(".alert").fadeTo(500, 0).slideUp(500, function () {
                   $(this).remove();
               });
-          }, 5000);
-      }
+         }, 5000);
+         $('input[type=submit]').attr('disabled', false);
+    }
     });
-  event.preventDefault();
-  return false;
+event.preventDefault();
+return false;
 });
+$('.selectModal').on('hidden.bs.modal', function () {
+    $('input[type=text]').val('');
+})
 });
 </script>
 </head>
 <body>
-<div class="modal fade selectModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header">
-<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-<h4 class="modal-title" id="myModalLabel">Select location</h4>
-</div>
+    <div id="loading">
+        <img id="loading-image" src="resources/images/wait.gif" alt="Loading..." />
+    </div>
+    <div class="modal fade selectModal" tabindex="-1" role="dialog"
+        aria-labelledby="myModalLabel" aria-hidden="true" id="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close"
+                        data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Select
+                        location</h4>
+                </div>
 
-<div class="modal-body">
-    <p class="result"></p>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-<!--     <a class="btn btn-danger btn-ok">Ok</a> -->
-</div>
-</div>
-</div>
-</div>
+                <div class="modal-body">
+                    <p class="result"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                        class="btn btn-default modal_close"
+                        data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
 
@@ -86,42 +109,64 @@ $(".submit_form").submit(function(event) {
             <form method="post" action="/" class="submit_form">
                 <div class="form-group">
                     <input type="text" class="form-control input-sm"
-                        name="search" placeholder="search" />
+                        name="search" placeholder="e.g. place name, postcode, station..." />
                 </div>
                 <div class="form-group">
                     <input type="submit" value="lookup"
-                        class="btn btn-info btn-block" />
+                        class="btn btn-info btn-block submit_btn"/>
                 </div>
             </form>
             <div class="row">
                 <div class="col-sm-12">
-                    <button type="button" class="btn btn-success">IG11 0SN</button>
-                    <button type="button" class="btn btn-success">IG11 0SN</button>
-                    <button type="button" class="btn btn-success">IG11 0SN</button>
-                    <button type="button" class="btn btn-success">IG11 0SN</button>
-                    <button type="button" class="btn btn-success">IG11 0SN</button>
-                    <button type="button" class="btn btn-success">IG11 0SN</button>
-                    <button type="button" class="btn btn-success">IG11 0SN</button>
-                    <button type="button" class="btn btn-success">IG11 0SN</button>
+                    <c:forEach items="${cached_request}" var="cached_request" varStatus="loop">
+                      <button type="button" class="btn btn-success search${loop.index}">${cached_request}</button>
+                        <script>
+                          $(document).ready(function() {
+                              $('.search${loop.index}').click(function() {
+                              $('input[type=text]').val('${cached_request}');
+                              $('.submit_btn').trigger('click');
+                          });
+                          });
+                        </script>
+                    </c:forEach>
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-8">
                     <c:if test="${!empty distances}">
                         <h2>search by <b>${search_view}</b></h2>
+                        
+                        
                         <ul class="list-group">
-                        <c:forEach items="${distances}" var="distance">
+                        <c:forEach items="${distances}" var="distance"  varStatus="loop">
                         <li class="list-group-item">
-                            <a href="${ctxt}/pub?search=${distance.pub.postCode}&search_view=${distance.pub.postCode}">
-                                <p><b>Name:&nbsp</b><i>${distance.pub.pubName}</i></p>
-                                <p><b>Address:&nbsp</b><i>${distance.pub.address}</i></p>
-                                <p><b>Post code:&nbsp</b><i>${distance.pub.postCode}</i></p>
-                                <p><b>Country:&nbsp</b><i>${distance.pub.country}</i></p>
-                                <p><b>City:&nbsp</b><i>${distance.pub.city}</i></p>
-                                <p><b>District:&nbsp</b><i>${distance.pub.district}</i></p>
-                                <p><b>Distance:&nbsp</b><i>${distance.distance}</i></p>
-                            </a>
-                            </li>
+                        <div class="row">
+                        <div class="col-sm-6">
+                            <p><b>Name:&nbsp</b><i>${distance.pub.pubName}</i></p>
+                            <p><b>Address:&nbsp</b><i>${distance.pub.address}</i></p>
+                            <p><b>Post code:&nbsp</b>
+                            <button type="button" class="btn btn-default search-body${loop.index}"><i>${distance.pub.postCode}</i></button>
+                            <script>
+                            $(document).ready(function() {
+                              $('.search-body${loop.index}').click(function() {
+                              $('input[type=text]').val('${distance.pub.postCode}');
+                              $('.submit_btn').trigger('click');
+                              });
+                              });
+                            </script>
+                            </p>
+                            <p><b>Country:&nbsp</b><i>${distance.pub.country}</i></p>
+                            <p><b>City:&nbsp</b><i>${distance.pub.city}</i></p>
+                            <p><b>District:&nbsp</b><i>${distance.pub.district}</i></p>
+                            <p><b>Distance:&nbsp</b><i>${distance.distance}</i></p>
+                            </div>
+                            <div class="col-sm-6">
+                                <div style="align:\"right\";max-width: 200px; height: 150px;">
+                                    <img style="max-width: 200px; height: 150px;" src="picture/${distance.pub.pubId}" alt="beer"/>
+                                </div>
+                            </div>
+                        </div>
+                        </li>
                         </c:forEach>
                         </ul>
                     </c:if>
@@ -129,9 +174,11 @@ $(".submit_form").submit(function(event) {
                 <div class="col-sm-4">
                     <h2>Most recent searches</h2>
                     <ul class="list-group">
-                        <li class="list-group-item">First item</li>
-                        <li class="list-group-item">Second item</li>
-                        <li class="list-group-item">Third item</li>
+                        <c:forEach items="${cached_search}" var="cached_search">
+                            <li class="list-group-item">
+                                <a href="${ctxt}/specify?search=${cached_search.key}" >${cached_search.value}</a>
+                            </li>
+                        </c:forEach>
                     </ul>
                 </div>
             </div>

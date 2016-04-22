@@ -16,6 +16,7 @@ post_code varchar(30),
 country varchar(200),
 city varchar(200),
 district varchar(200),
+picture blob,
 PRIMARY KEY (pub_id)
 ) ENGINE=InnoDB;
 

@@ -1,37 +1,27 @@
 package com.pub.lookup.service.impl;
 
-import java.io.ByteArrayInputStream;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.tidy.Tidy;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.HtmlDivision;
-import com.gargoylesoftware.htmlunit.html.HtmlImage;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSection;
 import com.pub.lookup.dao.interfaces.DistanceDao;
@@ -94,7 +84,7 @@ public class PubProviderServiceImpl implements PubProviderService {
         return doGetRequest(request, geoSearch);
     }
 
-    private Point doGetRequest(String url, GeoSearch search) throws Exception {
+    private Point doGetRequest(String searchUrl, GeoSearch search) throws Exception {
         
         Point point = new Point();
         point.setPointId(search.getSearchId());
@@ -104,14 +94,22 @@ public class PubProviderServiceImpl implements PubProviderService {
 
         HtmlPage page = null;
         try {
-            page = webClient.getPage(url);
+            page = webClient.getPage(searchUrl);
             
             webClient.waitForBackgroundJavaScript(10000);
-//            List<HtmlSection> sections = (List<HtmlSection>) page.getByXPath("//section[@class=\"pub\"]");
-//            List<HtmlImage> img = (List<HtmlImage>) page.getByXPath("//img[@class=\"pub_image\"]");
             
-            List<HtmlDivision> details = (List<HtmlDivision>) page.getByXPath("//div[@class=\"pub_details\"]");
-            for (HtmlDivision div : details) {
+            List<HtmlSection> sections = (List<HtmlSection>) page.getByXPath("//section[@class=\"pub\"]");
+            for(HtmlSection section : sections) {
+                
+                DomNodeList<HtmlElement> divList = section.getElementsByTagName("div");
+                HtmlElement div = divList.get(0);
+                
+                DomNodeList<HtmlElement> imgList = section.getElementsByTagName("img");
+                HtmlElement img = imgList.get(0);
+                
+                String picturePath = img.getAttribute("src");
+                
+                byte[] picture = downloadPicture(url + picturePath);
                 
                 List<String> rawValues = new ArrayList<String>();
                 for (DomElement element : div.getChildElements()) {
@@ -144,6 +142,9 @@ public class PubProviderServiceImpl implements PubProviderService {
                         pub.setCity(city);
                         pub.setPostCode(postCode);
                         pub.setAddress(address);
+                        if (picture != null) {
+                            pub.setPicture(picture);
+                        }
                         pubDao.add(pub);
                     }
                     Distance dist = new Distance();
@@ -165,5 +166,44 @@ public class PubProviderServiceImpl implements PubProviderService {
         }
         return point;
    }
+
+    private byte[] downloadPicture(String urlStr) {
+        InputStream in = null;
+        ByteArrayOutputStream out = null;
+        try {
+            URL url = new URL(urlStr);
+            in = new BufferedInputStream(url.openStream());
+            out = new ByteArrayOutputStream();
+            byte[] buf = new byte[2048];
+            int n = 0;
+            while (-1 != (n = in.read(buf))) {
+                out.write(buf, 0, n);
+            }
+        } catch (IOException e) {
+
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return out == null ? null : out.toByteArray();
+    }
+
+    @Override
+    public PubEntity getPubById(String pubId) {
+        return pubDao.find(pubId);
+    }
     
 }

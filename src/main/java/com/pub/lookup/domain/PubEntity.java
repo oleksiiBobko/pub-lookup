@@ -37,6 +37,9 @@ public class PubEntity {
     @Column(name = "district")
     private String district;
     
+    @Column(name = "picture")
+    private byte[] picture;
+    
     @OneToMany(targetEntity = Distance.class, mappedBy = "pub", 
             fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Distance> distances;
@@ -114,6 +117,14 @@ public class PubEntity {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public byte[] getPicture() {
+        return picture;
+    }
+
+    public void setPicture(byte[] picture) {
+        this.picture = picture;
     }
 
 }
