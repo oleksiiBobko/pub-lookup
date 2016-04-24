@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.pub.lookup.util.PubUtils;
+
 @Entity
 @Table(name="pub")
 public class PubEntity {
@@ -49,7 +51,7 @@ public class PubEntity {
     }
 
     public PubEntity(String pubName, String city) {
-        this.pubId = pubName + city;
+        this.pubId = PubUtils.normalize(pubName + city);
         this.pubName = pubName;
         this.city = city;
         setDistances(new ArrayList<Distance>());

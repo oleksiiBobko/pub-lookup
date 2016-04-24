@@ -34,6 +34,7 @@ import com.pub.lookup.domain.Point;
 import com.pub.lookup.domain.PubEntity;
 import com.pub.lookup.service.GeoApiService;
 import com.pub.lookup.service.PubProviderService;
+import com.pub.lookup.util.PubUtils;
 
 @Service
 @Transactional
@@ -132,7 +133,7 @@ public class PubProviderServiceImpl implements PubProviderService {
                 PubEntity pub = null;
                 
                 if(m.find() && pubName != null && !pubName.isEmpty() && city != null && !city.isEmpty()) {
-                    pub = pubDao.find(pubName + city);
+                    pub = pubDao.find(PubUtils.normalize(pubName + city));
                     if(pub == null) {
                         pub = new PubEntity(pubName, city);
                         GeoSearch pubInfoList = geoApiService.validateSearch(city);
@@ -203,7 +204,7 @@ public class PubProviderServiceImpl implements PubProviderService {
 
     @Override
     public PubEntity getPubById(String pubId) {
-        return pubDao.find(pubId);
+        return pubDao.find(PubUtils.normalize(pubId));
     }
     
 }
